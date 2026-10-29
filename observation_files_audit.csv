@@ -1,0 +1,9 @@
+market,timeframe,forecast_file,observation_level_available,paired_test_completed,status
+US,M1,/mnt/data/holdout_forecasts.csv,True,True,Paired tests available
+US,M5,/mnt/data/GT_GARCH_HMM_US_M5/holdout_forecasts.csv,False,False,summary_only; statistical comparisons unavailable
+US,M10,/mnt/data/GT_GARCH_HMM_US_M10/holdout_forecasts.csv,False,False,summary_only; statistical comparisons unavailable
+US,M15,/mnt/data/GT_GARCH_HMM_US_M15/holdout_forecasts.csv,True,True,Paired tests available
+WIN,M1,/mnt/data/GT_GARCH_HMM_WIN_M1/holdout_forecasts.csv,False,False,summary_only; statistical comparisons unavailable
+WIN,M5,/mnt/data/GT_GARCH_HMM_WIN_M5/holdout_forecasts.csv,False,False,summary_only; statistical comparisons unavailable
+WIN,M10,/mnt/data/GT_GARCH_HMM_WIN_M10/holdout_forecasts.csv,False,False,summary_only; statistical comparisons unavailable
+WIN,M15,/mnt/data/GT_GARCH_HMM_WIN_M15/holdout_forecasts.csv,True,True,Paired tests available

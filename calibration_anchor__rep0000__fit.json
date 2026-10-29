@@ -1,0 +1,59 @@
+{
+  "DGP": {
+    "id": "calibration_anchor__rep0000",
+    "scenario": "calibration_anchor",
+    "rep": 0,
+    "seed": 3458662461,
+    "n": 400,
+    "n_train": 320,
+    "dataset_path": "datasets/calibration_anchor__rep0000.csv",
+    "identification": "identifiable",
+    "true_rho": 0.8999999999999999,
+    "true_pi0": 0.6,
+    "true_p00": 0.96,
+    "true_p11": 0.94,
+    "true_nu0": 12.0,
+    "true_nu1": 4.5,
+    "true_s0": 0.5,
+    "true_s1": 1.8
+  },
+  "fit": {
+    "params": {
+      "p00": 0.890858269893323,
+      "p11": 0.9551627180042667,
+      "nu0": 6.810298156645633,
+      "nu1": 6.188829648019601,
+      "s0": 2.0082015637205406,
+      "s1": 0.45750828008595606
+    },
+    "loglik_train": -436.8380385408139,
+    "success": true,
+    "swapped_labels": false,
+    "boundary_flags": {
+      "p00": false,
+      "p11": false,
+      "nu0": false,
+      "nu1": false,
+      "s0": false,
+      "s1": false
+    },
+    "optimizer_starts": [
+      {
+        "start": 0,
+        "success": true,
+        "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+        "nll": 436.83803856791747,
+        "nit": 56
+      },
+      {
+        "start": 1,
+        "success": true,
+        "message": "CONVERGENCE: RELATIVE REDUCTION OF F <= FACTR*EPSMCH",
+        "nll": 436.8380385408139,
+        "nit": 55
+      }
+    ]
+  },
+  "oracle_alignment_only_for_evaluation": true,
+  "estimator_did_not_use_truth": true
+}

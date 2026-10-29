@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.venv/
+venv/
+.ipynb_checkpoints/
+# Generated research runs (keep released result summaries in data/)
+results/
+code/simulation/results/
+code/theorem/results/
+code/empirical/results/
+*.log
+*.aux
+*.out
+*.toc
+*.synctex.gz
+# Operating system/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+# Large / private raw datasets -- never commit automatically
+raw_market_data/
+full_raw_paths/
+credentials*
+.env
+*.key

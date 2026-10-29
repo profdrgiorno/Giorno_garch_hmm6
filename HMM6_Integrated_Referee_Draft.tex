@@ -1,0 +1,506 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[margin=0.94in,top=0.88in,bottom=0.85in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern,microtype,amsmath,amssymb,amsthm,mathtools,booktabs,array,enumitem,longtable,xcolor,hyperref,fancyhdr}
+\definecolor{ink}{HTML}{19344B}
+\definecolor{accent}{HTML}{146782}
+\definecolor{muted}{HTML}{52616E}
+\hypersetup{colorlinks=true,linkcolor=accent,urlcolor=accent,citecolor=accent,pdftitle={Local Omitted-Jump Bias in Student-t HMMs},pdfauthor={J. Giorno}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5.2pt}
+\setlist[itemize]{topsep=2pt,itemsep=2pt,leftmargin=1.45em}
+\setlist[enumerate]{topsep=3pt,itemsep=3pt,leftmargin=1.55em}
+\allowdisplaybreaks[1]
+\emergencystretch=2em
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small\color{muted} Giorno--Tsallis Research Program}
+\fancyhead[R]{\small\color{muted} HMM-6 | Integrated referee-review draft}
+\fancyfoot[C]{\small\thepage}
+\renewcommand{\headrulewidth}{0.3pt}
+\newtheorem{theorem}{Theorem}
+\newtheorem{proposition}{Proposition}
+\newtheorem{corollary}{Corollary}
+\newtheorem{remark}{Remark}
+\newcommand{\E}{\mathbb E}
+\newcommand{\Prb}{\mathbb P}
+\newcommand{\eps}{\varepsilon}
+\newcommand{\bt}{\boldsymbol}
+\begin{document}
+\begin{center}
+{\Large\bfseries\color{ink} Local Omitted-Jump Bias in the Observed Likelihood of Student-$t$ Hidden Markov Models}\par
+\vspace{5pt}
+{\large\color{accent} Finite-Window Sensitivity, Known-DGP Identification, and M1--M15 Evidence}\par
+\vspace{9pt}
+J. Giorno, PhD\\
+{\small 29 October 2026 \quad | \quad Integrated referee-review draft \quad | \quad Target journal: to be confirmed}
+\end{center}
+\begin{abstract}
+We characterize the first-order pseudo-true displacement of a centered, six-parameter two-state Student-$t$ hidden Markov model (HMM) when rare Bernoulli--Gamma downward impulses are omitted from its \emph{observed} likelihood. For fixed finite observation windows, under local identification and regularity, the derivative equals the inverse observed Fisher information times a score--jump-score cross moment involving full-sequence smoothed probabilities. We distinguish that theorem from a known-DGP recovery study with 4,000 independent length-6,000 paths across eight generating scenarios and 19 blind econometric competitors, including GARCH, EGARCH, GJR, and power/asymmetry variants of APARCH. Persistence is recovered accurately for clearly scale-separated states but poorly for equal-variance tail-only and weak-tail states; a no-persistence iid-mixture control produces false positive average fitted persistence. Exact paired path-bootstrap OOS comparisons show conditional forecasting gains rather than universal dominance. We additionally retain WIN and a provisionally labeled U.S. intraday series at M1, M5, M10, and M15: a distinct GARCH--HMM has the highest descriptive mean log score in five of eight comparisons, with nonuniform VaR loss rankings and incomplete observation-level paired inference. Earlier finite-window Gamma-impulse numerical checks and gap-aware two-market tail-risk comparisons are retained as separate experiments. A custom EGARCH implementation produced 11 numerically penalized paths requiring targeted repair; U.S. instrument provenance and selected bootstrap optimizations also require verification. The analysis demonstrates both the local mathematical effect of a specified omitted shock and the practical limits of empirical hidden-tail identification; it neither identifies historical Gamma jumps nor establishes universal market-prediction or welfare improvements.
+\end{abstract}
+\noindent\textbf{Keywords:} Hidden Markov model; local misspecification; observed likelihood; Student-$t$ tails; Tsallis $q$; bootstrap profile; Value at Risk; Monte Carlo sensitivity.\\
+\textbf{JEL:} C13, C15, C22, C52, G17.
+
+\section{Motivation, problem, and revised scope}
+The research program initially investigated a two-state Student-$t$ HMM augmented with asymmetric Gamma shocks. An earlier broad revision proposal also called for full HMM-9 identification, boundary-jump testing, extensive model competitions, and predictive superiority. Those are valid future questions, but several of the suggested theoretical conclusions had not been demonstrated and the accumulated data do not justify asserting them. The present analysis answers one sharply posed econometric question:
+
+\emph{How does a correctly specified observed-data Student-$t$ HMM's pseudo-true parameter vector move locally when rare additive shocks are omitted from its fitted likelihood?}
+
+This is a misspecification sensitivity question, not a declaration that Gamma jumps caused the real returns. The theoretical novelty is not the Student-$t$/Tsallis change of variables alone; it is the precise propagation of one omitted impulse through all posterior state and transition weights in a dependent observed HMM. The argument is a fixed-$T$ theorem; any long-run extrapolation requires further work.
+
+\textbf{Primary contribution.} Prove and numerically verify a local observed-likelihood bias formula, give two exactly equivalent ways to calculate its numerator, characterize first-order confounding with baseline parameters, and establish the weak-jump asymmetry between second-order parameter responses and first-order direct directional risk. \textbf{Secondary contribution.} Extend the calculation conditionally to correctly identified gap types and report transparent HMM-6 baseline evidence, including failures and caveats. \textbf{Explicit exclusions.} No proof of full HMM-9 global identification, no proof of positive real-market jump intensity, no general boundary likelihood-ratio distribution, no universal sign of $q$ bias, and no claim that HMM-9 dominates skew-$t$ or volatility models.
+
+\section{Baseline HMM, jump perturbation, and interpretation of $q$}
+Let $K_t\in\{0,1\}$ be a stationary two-state Markov chain with
+\begin{equation}
+P_\psi=\begin{pmatrix}p_{00}&1-p_{00}\\1-p_{11}&p_{11}\end{pmatrix},\quad
+\psi=(p_{00},p_{11},\nu_0,\nu_1,s_0,s_1)^\top.\label{eq:parameters}
+\end{equation}
+Given the state path, emissions $X_t$ are conditionally independent and centered Student-$t$ with density $f_{K_t}(x;\nu_{K_t},s_{K_t})$, $\nu_j>2$, $s_j>0$. The initial law $\pi_\psi$ is positive and smooth (stationary initialization is one admissible choice). The \emph{observed} no-jump likelihood is
+\begin{equation}
+p_\psi^{(T)}(y_{1:T})=\sum_{k_{1:T}}\pi_\psi(k_1)
+\prod_{t=2}^T P_\psi(k_{t-1},k_t)\prod_{t=1}^T f_{k_t}(y_t;\psi),\quad
+S_T(\psi;y)=\nabla_\psi\log p_\psi^{(T)}(y).\label{eq:observed}
+\end{equation}
+This density is evaluated with a scaled forward algorithm; smoothing is computed from the same full sequence. The baseline true parameter is $\psi_0$. For independent $B_t\sim\mathrm{Bernoulli}(\eps)$ and $G_t\sim\mathrm{Gamma}(k,\theta)$ (shape $k$, scale $\theta$), with fixed $k,\theta>0$, define
+\begin{equation}
+Y_t^\eps=X_t-B_tG_t,\qquad
+h_j(y;k,\theta)=\int_0^\infty f_j(y+g;\psi_0)\frac{g^{k-1}e^{-g/\theta}}{\Gamma(k)\theta^k}\,dg,\quad
+g_{\eps,j}=(1-\eps)f_j+\eps h_j.\label{eq:convolution}
+\end{equation}
+The econometrician continues fitting $p_\psi^{(T)}$, which has no jump component. Let $Q_T(\psi,\eps)=\E_\eps\log p_\psi^{(T)}(Y^\eps)$ and let $\psi_T^*(\eps)$ denote the locally unique maximizer branch near $\psi_0$.
+
+The Student-$t$ tail-shape reparameterization is
+\begin{equation}
+q_j=\frac{\nu_j+3}{\nu_j+1}=1+\frac{2}{\nu_j+1},\qquad
+\frac{dq_j}{d\nu_j}=-\frac{2}{(\nu_j+1)^2}.\label{eq:qmap}
+\end{equation}
+When $\nu_j>2$, $1<q_j<5/3$. Here $q_j$ is a \emph{bijective tail-shape label}, not a measured thermodynamic entropy. A smoothed weighted average of the state-specific $q_j$ is not the asymptotic tail parameter of the predictive mixture. Label switching must be handled by a prespecified, defensible rule (for example, order states by intraday scale when scales are distinct), \emph{not} by assuming $\nu_0-\nu_1$ must be positive.
+
+\section{Main result: finite-window omitted-jump sensitivity}
+Write $S_T(Y)=S_T(\psi_0;Y)$ and define the observed information
+\begin{equation}
+I_T=\E_0[S_T S_T^\top]=-\E_0\left[\nabla_\psi^2\log p_\psi^{(T)}(Y)\big|_{\psi_0}\right]\succ0.\label{eq:info}
+\end{equation}
+For $X^{[t,g]}=(X_1,\ldots,X_{t-1},X_t-g,X_{t+1},\ldots,X_T)$, let
+\begin{equation}
+B_T=\sum_{t=1}^T\E_0\E_G\{S_T(X^{[t,G]})-S_T(X)\}.\label{eq:single}
+\end{equation}
+Define exact \emph{no-jump} smoothing probabilities $\gamma_{tj}(y)=\Prb_0(K_t=j\mid Y_{1:T}=y)$ and the observed jump-incidence score
+\begin{equation}
+W_T(y;k,\theta)=\sum_{t=1}^T\sum_{j=0}^1\gamma_{tj}(y)
+\left\{\frac{h_j(y_t;k,\theta)}{f_j(y_t;\psi_0)}-1\right\}.\label{eq:W}
+\end{equation}
+\begin{theorem}[Finite-window local omitted-jump bias; refined Theorem 1]\label{thm:main}
+Fix finite $T$ and a fixed Gamma direction $(k,\theta)$. Suppose $\psi_0$ is interior and locally identified under a declared label convention; $Q_T$ is sufficiently differentiable with the requisite domination and expectation interchange; the no-jump likelihood is correctly specified with the information identity; and $I_T$ in \eqref{eq:info} is finite and positive definite. Assume in addition the existence of a locally unique pseudo-true maximum near $\psi_0$. Then the branch has a right derivative at $\eps=0$ and
+\begin{equation}
+\boxed{\quad\psi_T^*(\eps)=\psi_0+\eps I_T^{-1}B_T+o(\eps),\qquad
+B_T=\E_0[S_TW_T].\quad}\label{eq:theorem}
+\end{equation}
+For each state $j$, $\frac{d}{d\eps}q_{j,T}^*(0+)=-2[ I_T^{-1}B_T]_{\nu_j}/(\nu_{j,0}+1)^2$. No universal sign follows.
+\end{theorem}
+The complete proof is presented in \textbf{Appendix A}. It uses the \emph{joint hidden-path likelihood} only to derive the marginal observed-likelihood score, and then differentiates the \emph{observed} population score equation. Thus no Markov states are treated as known. An impulse at time $t$ can alter smoothing across the entire window; an emission-only calculation with frozen smoothing weights is not equivalent to \eqref{eq:theorem}.
+
+\section{Equivalent score geometry and limitations}
+\subsection{Exact observed-score equivalence}
+Let $p_\eps(y)$ denote the contaminated observed density evaluated at the fixed baseline $\psi_0$. Differentiation at the boundary gives $W_T(y)=\partial_\eps^+\log p_\eps(y)|_{0}$ and $\E_0[W_T]=0$. Multiplying the derivative of $p_\eps$ by $S_T$ and integrating proves the equality between \eqref{eq:single} and $\E_0[S_TW_T]$. These are \emph{two expressions for the same exact finite-$T$ numerator}, not two different approximations.
+
+\subsection{Efficient jump score and local confounding}
+For fixed $(k,\theta)$ and $W_T\in L^2(P_0)$, define
+\begin{equation}
+W_T^{\mathrm{eff}}=W_T-B_T^\top I_T^{-1}S_T,\qquad
+J_{T,\mathrm{eff}}=\E_0[(W_T^{\mathrm{eff}})^2]
+=\E_0[W_T^2]-B_T^\top I_T^{-1}B_T\ge0.\label{eq:efficient}
+\end{equation}
+If $J_{T,\mathrm{eff}}=0$, the fixed Gamma jump-incidence score is locally confounded with the baseline score space; if positive, that score has a nonzero component orthogonal to baseline parameter shifts. This is a \emph{local score-level distinguishability condition for specified $(k,\theta)$}, not a global identification theorem for $\eps,k,\theta$ or a boundary-valid jump test. At $\eps=0$, $k$ and $\theta$ are not identified.
+
+\subsection{Exact sign-symmetry limit of the fitted centered HMM}
+Because every centered Student-$t$ emission is symmetric, $p_\psi^{(T)}(-y)=p_\psi^{(T)}(y)$ and $S_T(-y)=S_T(y)$. With a symmetric no-jump baseline, otherwise identical positive and negative Gamma impulses produce the \emph{same} first-order bias of the fitted centered-HMM parameters. Consequently, the direction of shocks is not recovered from this symmetric pseudo-true displacement alone; additional asymmetric information or a different model is required.
+
+\section{Gap-aware conditional extension}
+Let observed interval marks $d_t\in\mathcal A$ distinguish correctly verified within-session, genuine overnight, and irregular same-day intervals. Let $p_\psi(y\mid d)$ be a properly normalized conditional observed HMM with potentially mark-dependent emission scales and, if explicitly modeled, mark-dependent transitions. For type $a$, allow contamination intensity $\eps_a$ and fixed jump-magnitude density. Let $S_{T,d}$ and $\gamma_t(j;y,d)$ be its exact observed score and smoothed probabilities. Then, under the conditional counterparts of Theorem~\ref{thm:main},
+\begin{align}
+W_{T,a}(y\mid d)&=\sum_{t:d_t=a}\sum_j\gamma_t(j;y,d)
+\left\{\frac{h_{j,a}(y_t)}{f_{j,a}(y_t)}-1\right\},\\
+\psi_T^*(\bt\eps)-\psi_0&=I_{T,d}^{-1}\sum_{a\in\mathcal A}\eps_a\E_{0,d}[S_{T,d}W_{T,a}]+o(\|\bt\eps\|).\label{eq:gap}
+\end{align}
+An observed calendar-date change alone does not certify a genuine exchange closure; futures rolls, stale prices, halts, timestamps, and clock changes must be investigated. This result conditions on valid marks and does not prove separately identifiable jump intensities for each mark category. The original homogeneous no-jump HMM has \emph{six} parameters; the pilot gap-aware two-state model adds two state-specific overnight scale multipliers, so its unconstrained version has \emph{eight}, not six. A three-parameter Gamma component would make that particular extension eleven parameters, not nine.
+
+
+\section{Weak-jump symmetry and the limits of risk interpretation}
+\label{sec:weak-econ}
+This section adds an analytic consequence of Theorem~1 to the existing E1--E2 economic framework. It establishes why a symmetric centered HMM may exhibit small changes in fitted parameters despite an economically material first-order directional change in the data-generating distribution. It does not assert that actual WIN\$ or SPY returns contain Bernoulli--Gamma jumps.
+
+Write $G_t=\theta Z_t$ with $Z_t\sim\mathrm{Gamma}(k,1)$ and set
+\begin{align}
+A_T(y)&=\sum_{t=1}^{T}\sum_{j=0}^{1}\gamma_{tj}(y)\frac{f_j'(y_t)}{f_j(y_t)},
+& C_T(y)&=\sum_{t=1}^{T}\sum_{j=0}^{1}\gamma_{tj}(y)\frac{f_j''(y_t)}{f_j(y_t)}.\label{eq:p3-ac}
+\end{align}
+The derivatives $f_j'$ and $f_j''$ are with respect to the return argument, not the parameter. The smoother is evaluated under the \emph{uncontaminated full observed-data HMM}. Let $Q_{\alpha}^{\rm true}(\eps,\theta)$ be the lower $\alpha$-quantile of the stationary one-observation contaminated marginal distribution; $Q_{\alpha}^{6}(\eps,\theta)$ is the lower marginal quantile implied by the centered pseudo-true HMM. This distinction does not substitute a full-sample smoothed quantile for an ex-ante conditional forecast.
+
+\begin{proposition}[3: weak-shock statistical and quantile asymmetry]\label{prop:p3}
+Suppose Theorem~1 holds for fixed $T$ and the stationary centered Student-$t$ HMM. Assume: (i) the emission translations admit second-order $L^1$ and score-weighted expansions as $\theta\downarrow0$, with sufficient envelopes to interchange differentiation and integration; (ii) $I_T\succ0$ and the no-jump model has a consistent local labeling; (iii) the stationary marginal baseline density $f_0^{\rm mar}$ is continuous and strictly positive at the lower $\alpha$-quantile; and (iv) the relevant model-implied marginal quantile functional is differentiable in $\beta$. Then, for fixed $k>0$,
+\begin{align}
+ d_T(\theta)&:=\left.\partial_{\eps}\beta_T^*(\eps,\theta)\right|_{0^+}
+ =\theta^2D_T+o(\theta^2),\label{eq:p3-deriv}\\
+ D_T&=\frac{k(k+1)}{2}I_T^{-1}\E_0[S_T(Y)C_T(Y)],\label{eq:p3-d}\\
+ \left.\partial_{\eps}q_j^*(\eps,\theta)\right|_{0^+}
+ &=-\frac{2\theta^2}{(\nu_j+1)^2}[D_T]_{\nu_j}+o(\theta^2),\quad j=0,1.\label{eq:p3-q}
+\end{align}
+The true and fitted \emph{marginal} lower-quantile derivatives satisfy
+\begin{align}
+\left.\partial_{\eps}Q_{\alpha}^{\rm true}(\eps,\theta)\right|_{0^+}&=-k\theta+O(\theta^2),\label{eq:p3-qtrue}\\
+\left.\partial_{\eps}Q_{\alpha}^{6}(\eps,\theta)\right|_{0^+}&=O(\theta^2),\label{eq:p3-qfit}\\
+\left.\partial_{\eps}\bigl(Q_{\alpha}^{6}-Q_{\alpha}^{\rm true}\bigr)\right|_{0^+}&=k\theta+O(\theta^2).\label{eq:p3-gap}
+\end{align}
+Hence the misspecification channel in fitted parameters and smooth fitted risk summaries is generically second order in \emph{shock magnitude}, while the direct left-quantile impact of negative shocks is first order. A component of $D_T$ may vanish; its sign is not universal. The expansions concern the \emph{right derivative at $\eps=0$ followed by the weak-shock limit $\theta\downarrow0$}; simultaneous two-parameter remainders require additional uniformity.
+\end{proposition}
+
+\begin{remark}[Loss VaR and the sign of the error]\label{rem:p3-var}
+With a loss convention $\mathrm{VaR}_{\alpha}=-Q_{\alpha}$, equation~\eqref{eq:p3-gap} gives
+$\partial_{\eps}(\mathrm{VaR}_{\alpha}^{\rm true}-\mathrm{VaR}_{\alpha}^{6})|_{0^+}=k\theta+O(\theta^2)$. This is a local, synthetic-model statement for a marginal return and a fixed quantile level, not a measured VaR failure for WIN\$ or SPY. Conditional risk forecasts, positive jumps, gap-mark dynamics and nonlinear scale conventions need distinct derivations.
+\end{remark}
+
+
+\noindent\textit{Scope restriction.} The quantile implication is a model-based local illustration only; general decision-theoretic welfare and empirical economic costs are developed in a separate paper.\par
+\section{Monte Carlo design, numerical corrections, and verification}\label{sec:mc}
+\subsection{Design and observed-score check}
+The numerical experiment simulates independent trajectories from the centered two-state Student-$t$ HMM, with $\psi_0=(0.92,0.90,4.5,8.0,0.45,1.3)$, stationary initialization, sequence length $T=40$, and $15{,}000$ trajectories per random seed (20261026 and 20261027). Gamma shape is $k=2$, and deterministic 48-node quadrature approximates the emission convolution. Three successive experimental stages use the same baseline model and same two samples. V1 uses contamination $\eps\in\{0.005,0.01,0.02\}$ at $\theta\in\{0.2,0.5,0.9\}$; V2 repeats that grid with explicit numerical observed-score gradients, scaled optimizer coordinates, and sensitivity-informed initialization. V3 targets $\theta\in\{0.2,0.9\}$ and $\eps\in\{0.001,0.0025,0.005\}$, with linear zero-$\eps$ extrapolation. These are \emph{independent sequences across seeds}, not 30,000 separate estimates of a population derivative.
+
+A separate short-sequence deterministic check previously gave $W_T=2.811796533244$ from smoothing and the equivalent individual impulse density-ratio representation, with difference approximately $1.82\times10^{-14}$. The distinction between this algebraic identity and large-sample numerical verification is essential.
+\subsection{Why the initial optimization failed}
+At $\theta=0.2$, $\eps=0.005$, V1 returned finite differences of approximately $0.0006$--$0.0007$ for $\nu_1$, despite score-information predictions of about $1.66$--$1.87$. In V2 the corresponding estimates became $1.6520$ and $1.8131$, respectively. The original apparent null derivative was therefore largely attributable to optimizer resolution rather than an established contradiction of Theorem~\ref{thm:main}. Baseline reported gradient infinity norms in V2 are below $10^{-7}$, whereas the empirical information/Hessian condition numbers remain approximately $6.8\times10^4$ and $7.2\times10^4$; the numerical inverse information is consequently sensitive to sampling and curvature error.
+\subsection{Targeted V3 local-derivative results}
+For each simulation sample, let $\widehat d_{\mathrm{imp}}$ denote the \emph{sample-specific} implicit derivative formed from the empirical fitted Hessian and contamination perturbation, and let $\widehat d_{\mathrm{FD}}(\eps)=[\widehat\psi(\eps)-\widehat\psi(0)]/\eps$. This sample-specific comparison diagnoses numerical differentiation; it must not be conflated with the distinct population-target estimate $I_T^{-1}B_T$ at the true $\psi_0$. Table~\ref{tab:v3} reports the six-dimensional Euclidean difference.
+\begin{table}[htbp]\centering\small\setlength{\tabcolsep}{4pt}\caption{V3 numerical derivative accuracy: $\|\widehat d_{\mathrm{FD}}(\eps)-\widehat d_{\mathrm{imp}}\|_2$}\label{tab:v3}
+\begin{tabular}{lrrrr}\toprule
+& \multicolumn{2}{c}{$\theta=0.2$} & \multicolumn{2}{c}{$\theta=0.9$}\\
+$\eps$ & Seed 20261026 & Seed 20261027 & Seed 20261026 & Seed 20261027\\\midrule
+0.0050 & 0.01624 & 0.02219 & 6.65167 & 7.15508\\
+0.0025 & 0.00712 & 0.01336 & 3.42958 & 3.69276\\
+0.0010 & 0.00244 & 0.00632 & 1.39766 & 1.50601\\\midrule
+Linear $\eps\to0$ extrapolation & 0.00176 & 0.00286 & 0.13668 & 0.16636\\\bottomrule
+\end{tabular}
+\end{table}
+The errors decrease monotonically over these three positive steps in all four configurations. The extrapolation errors remain nonzero; finite-grid extrapolation does not prove mathematical convergence. For $\theta=0.2$, at $\eps=0.001$, the $\nu_1$ empirical-implicit/finite-difference pairs are $(1.6599,1.6581)$ and $(1.8129,1.8137)$. At $\theta=0.9$, the $\nu_0$ pairs are $(-58.4904,-57.7341)$ and $(-62.1620,-61.3916)$. The finite-$\eps$ curvature is more pronounced for large shocks. The $\nu_0$ population and empirical-implicit estimates for $\theta=0.2$ differ materially in one seed, emphasizing that matching a fixed-sample derivative is not the same as establishing precision of the population derivative.
+
+\subsection{Interpretation and unresolved diagnostics}
+The data support numerical verification of the \emph{sample-specific local derivative} over the tested grid, with replication under two independent random seeds. They do not yet provide confidence intervals for the full population sensitivity vector. The main unresolved components are estimating Monte Carlo uncertainty for $I_T^{-1}B_T$, auditing Hessian and quadrature accuracy, checking all local optimizer starts/bounds, and quantifying finite-sample conditioning. Values of $\widehat{\E}_0W_T$ depart from zero with opposite signs across seeds; population theory requires $\E_0W_T=0$, so this sample variability should remain visible in reproducibility materials. No claim about universal sign, actual omitted Gamma jumps, or asymptotic $T\to\infty$ identification follows from these calculations.
+
+\section{Known-DGP recovery and reverse-attribution evidence}\label{sec:dgp}
+\subsection{Design, estimands, and model boundaries}
+The large controlled experiment complements---but is not a numerical test of---Theorem~\ref{thm:main}. It draws 500 independent, length-6,000 centered Student-$t$ HMM paths from each of eight prespecified DGP conditions ($4{,}000$ paths in total), with a 600-observation burn-in, a chronological 80/20 estimation/forecast split, and 1,200 observations per holdout. For each training path the same six-parameter observed-likelihood HMM is estimated without using its true parameters or hidden states. Label alignment is performed \emph{only ex post} for assessment. The ``single Student-$t$'' control has identical emissions and hence unidentified transitions; numerical persistence estimates in that control are not interpretable parameters.
+
+The DGP conditions are: clearly separated scale-and-tail regimes (calibration anchor and full HMM), scale-only switching, tail-only switching at equal conditional variance, weak tail contrast, weak persistence, an independent mixture with $\rho=p_{00}+p_{11}-1=0$, and identical Student-$t$ emissions. The target estimands are transition persistence, emission parameters, classification relative to a majority-state benchmark, and predictive density. Bootstrap intervals for means are across \emph{independent simulated paths}, not confidence-interval coverage for individual model fits.
+
+The same 4,000 datasets were fitted blindly with 19 conventional specifications spanning static Student-$t$, iid mixture, AR/MA/ARMA and Student-$t$ GARCH, GJR, EGARCH, six power/asymmetry APARCH choices, and a Heston--Nandi-style variance recursion. These competitors do not contain the HMM transition parameters and therefore cannot ``recover'' those parameters. Their estimated coefficients are indicators of \emph{reverse attribution}: how a misspecified model absorbs latent dependence. ARMA and volatility families were not fitted as a fully joint ARMA--GARCH model, and the Heston--Nandi-style Student-$t$ recursion is not the closed-form Gaussian risk-neutral option-pricing model. All likelihoods use the locally implemented custom estimation code; independent implementation validation remains necessary.
+
+\subsection{Parameter recovery and the no-persistence controls}
+\begin{table}[htbp]\centering\footnotesize
+\caption{Known-DGP HMM persistence recovery ($T=6{,}000$, 500 paths each)}\label{tab:dgp_recovery}
+\setlength{\tabcolsep}{3.8pt}
+\begin{tabular}{lrrrrrr}\toprule
+DGP & True $\rho$ & Mean $\hat\rho$ & 95\% MC interval & State acc. & Majority acc. & $\hat\nu_0\ge99$ \\\midrule
+Calibration anchor & 0.900 & 0.900 & [0.899, 0.901] & 0.904 & 0.600 & 0 \\ 
+Full HMM-6 & 0.830 & 0.828 & [0.825, 0.830] & 0.884 & 0.824 & 5 \\ 
+Scale only & 0.785 & 0.784 & [0.781, 0.787] & 0.889 & 0.837 & 0 \\ 
+Tail only & 0.825 & 0.321 & [0.272, 0.366] & 0.608 & 0.857 & 66 \\ 
+Weak tail & 0.825 & 0.105 & [0.056, 0.155] & 0.452 & 0.857 & 73 \\ 
+Weak persistence & 0.190 & 0.156 & [0.106, 0.206] & 0.541 & 0.654 & 37 \\ 
+IID mixture & 0.000 & 0.186 & [0.142, 0.233] & 0.609 & 0.820 & 81 \\ 
+Single Student-$t$ & -- & -- & [--, --] & -- & -- & 33 \\ 
+\bottomrule\end{tabular}
+\par\vspace{2pt}\scriptsize\emph{Notes:} MC intervals describe uncertainty of the mean fitted persistence over independently generated paths. Accuracy uses ex-post oracle state-label matching; the majority benchmark is an ex-post constant-state classifier. Entries marked ``--'' are not identified. The final column counts fits near the Student-$t$ upper search boundary of 100.
+\end{table}
+
+Scale-separated regimes permit close recovery of the persistence coefficient. Under tail-only switching, the true $\rho=0.825$ but the average estimate is approximately 0.321; weak-tail switching is worse. The tail-only majority-state baseline exceeds the fitted state's 60.8\% accuracy, illustrating the difficulty of learning regimes that differ only through tail thickness while retaining equal conditional variances. Conversely, the iid mixture has $\rho=0$ by construction but the HMM estimates positive persistence on average. These are \emph{adverse findings}, not evidence for genuine persistent tails. They show that fitting an unrestricted two-state HMM is not a reliable automatic detector of Markov dependence. Some state-tail degrees of freedom reach the optimization bound even though all 4,000 HMM optimizations report numerical success. A check against the known-true likelihood flags one tail-only fit (\texttt{tail\_only\_rep0192}) whose fitted likelihood falls slightly below that evaluated at truth; this is an optimizer-quality warning.
+
+\subsection{Predictive comparisons and APARCH's mechanism of approximation}
+Define the paired pathwise log-score differential $d_b=\bar\ell_{b,\mathrm{HMM}}-\bar\ell_{b,\mathrm{competitor}}$. The following intervals resample 500 independent DGP paths with replacement. They are \emph{path-level Monte Carlo intervals}, not HAC tests for real financial series.
+\begin{table}[htbp]\centering\footnotesize
+\caption{Paired OOS log-score gain of known-DGP HMM versus symmetric-power APARCH}\label{tab:dgp_paired}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{lrrr}\toprule
+DGP & Mean gain & 95\% path-bootstrap interval & Pairs \\\midrule
+Calibration anchor & 0.028336 & [0.027814, 0.028851] & 500 \\ 
+Full HMM-6 & 0.005766 & [0.005451, 0.006073] & 500 \\ 
+Scale only & 0.004371 & [0.004102, 0.004651] & 500 \\ 
+Tail only & 0.000018 & [-0.000101, 0.000131] & 500 \\ 
+Weak tail & -0.000130 & [-0.000207, -0.000052] & 500 \\ 
+IID mixture & 0.000029 & [-0.000083, 0.000137] & 500 \\ 
+Single Student-$t$ & -0.000221 & [-0.000318, -0.000129] & 500 \\ 
+\bottomrule\end{tabular}
+\end{table}
+
+For clearly separated scale regimes the correctly specified HMM delivers positive density gains, while the tail-only and iid-mixture gains are indistinguishable from zero at this resolution and weak-tail data favor the simpler competitor on average. The identical-emission model can favor simpler density models, as it should. Such patterns are compatible with difficult practical identification in the tail-only experiment; they do not establish an analytical threshold for identification.
+
+\begin{table}[htbp]\centering\small
+\caption{Unrestricted APARCH estimates under known HMM DGPs (path averages)}\label{tab:aparch_attrib}
+\begin{tabular}{lrrr}\toprule
+DGP & Mean power $\hat\delta$ & Mean asym. $\hat\gamma$ & MC SE of mean $\hat\gamma$ \\\midrule
+Calibration anchor & 1.001 & 0.001 & 0.002 \\ 
+Full HMM-6 & 1.721 & 0.003 & 0.003 \\ 
+Scale only & 1.712 & 0.005 & 0.003 \\ 
+Tail only & 1.923 & 0.002 & 0.031 \\ 
+Weak tail & 1.922 & 0.063 & 0.028 \\ 
+\bottomrule\end{tabular}
+\end{table}
+
+APARCH's estimated power is near 1 for the calibration anchor but closer to 2 for the difficult tail-only DGP. Mean estimated asymmetry remains small relative to its uncertainty in these selected cases. This is consistent with \emph{power adaptation} providing a competing description for certain scale-switching mechanisms; it is not proof that latent HMM tails always induce spurious leverage.
+
+\paragraph{Numerical scoring qualification.} Eleven fitted EGARCH paths have invalid variance recursions that the custom implementation encoded using enormous artificial negative per-observation penalties. These values must not be reported as genuine predictive densities or used to rank EGARCH models. The path-matched audit flags penalized observations and reports valid-case comparisons separately, but selective deletion is not itself a repaired, complete-case-neutral forecasting experiment. EGARCH numerical stability and the single flagged HMM fit require targeted independent verification before final comparative inference. The full 76,000-fit inventory is preserved; no negative or null DGP findings have been omitted.
+
+\section{Intraday M1, M5, M10, and M15 forecast comparisons}\label{sec:freq}
+\subsection{A distinct GARCH--HMM experiment}
+We retain four sampling frequencies for each of two markets, WIN and a U.S. return series whose exact ticker, vendor, clock conventions and corporate-action adjustment are not independently verified. This study is \emph{not the same statistical model} as the centered HMM-6 in Theorem~\ref{thm:main}. Its benchmarks are (G0) GARCH--Student-$t$; (G1) a common-history GARCH recursion with independent two-component standardized Student-$t$ tails; and (G2) the same GARCH recursion coupled with a two-state Markov chain for the standardized innovation tail distribution. A typical G2 specification is
+\begin{align}
+R_t &= \mu+\sqrt{h_t}Z_t,\qquad h_t=\omega+\alpha(R_{t-1}-\mu)^2+\beta h_{t-1},\\
+Z_t\mid K_t=j &\sim t_{\nu_j}\!\left(0,\sqrt{(\nu_j-2)/\nu_j}\right),\quad K_t\mid K_{t-1}\sim P.
+\end{align}
+This common-history variance model is not a fully switching-GARCH recursion. With a fixed mean, G2 has seven free variance/tail/transition parameters, not the six parameters of the baseline theorem. Its results are \emph{incremental predictive checks} and cannot independently verify the fixed-window omitted-Gamma-shock derivative or identify an omitted jump process.
+
+\begin{table}[htbp]\centering\small
+\caption{M1--M15 results by market: mean OOS log-score differences}\label{tab:intraday8}
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{llrrrl}\toprule
+Market & Frequency & OOS $n$ & G2--G0 & G2--G1 & Best density \\\midrule
+WIN & M1 & 17,123 & 0.003417 & 0.002786 & GARCH--HMM \\ 
+U.S. & M1 & 15,339 & 0.001101 & 0.000995 & GARCH--HMM \\ 
+WIN & M5 & 3,412 & 0.000171 & -0.000722 & GARCH--IID mix \\ 
+U.S. & M5 & 3,002 & 0.000511 & 0.000896 & GARCH--HMM \\ 
+WIN & M10 & 1,694 & -0.000760 & -0.000640 & GARCH--$t$ \\ 
+U.S. & M10 & 1,493 & 0.002247 & 0.002224 & GARCH--HMM \\ 
+WIN & M15 & 1,122 & -0.000048 & 0.000141 & GARCH--$t$ \\ 
+U.S. & M15 & 964 & 0.001347 & 0.000343 & GARCH--HMM \\ 
+\bottomrule\end{tabular}
+\par\vspace{2pt}\footnotesize\emph{Notes:} Positive differences favor GARCH--HMM; all scores are calculated on the identical holdout target within each frequency. Absolute log scores across frequencies are not directly comparable because the return horizon and scale differ. ``Best'' is descriptive, not a multiple-testing-adjusted significance claim.
+\end{table}
+
+G2 has the highest mean log score in \emph{five} of the eight experiments (four U.S. frequencies and WIN M1); G1 leads WIN M5, and G0 leads WIN M10 and WIN M15. In the absence of a matched-path significance test for all eight cells, a ``five of eight'' count is descriptive rather than confirmatory. Sample lengths decline sharply from M1 to M15, while intraday observations across frequencies share overlapping underlying time periods. One chronological holdout per frequency is available; full matched observation-level uncertainty calculations were available for U.S. M1, U.S. M15, and WIN M15 only, not all eight cells. We therefore do not claim that HMM tails deliver uniform market or horizon-level improvement. The frequency-dependent reversals are consistent with the DGP message that latent-state separation and dynamics can be difficult to learn, but they do not identify the true market DGP or prove that the DGP's specific weak-tail mechanism generated the observed patterns.
+
+At confidence levels 95\%, 99\%, and 99.5\%, the separate GARCH-based VaR comparison reports a mix of quantile-loss winners (11 of the 24 market--frequency--level cells favor G2, seven G1 and six G0). VaR exceedance counts are not equivalent to a conditional coverage or expected-shortfall validation. The M1--M15 results must also be distinguished from the separate gap-aware, eight-parameter HMM versus static Student-$t$ exercise in Section~\ref{sec:var}. Thus three comparisons answer different questions: the theorem establishes local omitted-shock score sensitivity; the known-DGP study assesses identification and misattribution; the market studies assess conditional predictive distributions under specific fitted baseline models.
+
+\subsection{Implications of the DGP evidence for interpreting the market results}
+A positive GARCH--HMM forecast differential does not establish that persistent latent tail states exist: IID mixtures can induce false fitted persistence, and equal-variance tail-only regimes can be difficult to recover. Conversely, a null predictive difference need not prove absence of state dependence. Evidence that would strengthen a particular market-level identification claim includes a fitted regime contrast away from parameter bounds, nonstandard-valid tests against an iid-mixture null, repeated-origin causal validation, timestamp verification, and reproducible matching of observation-level scores. We report both positive and unfavorable outcomes while keeping the theoretical and market-level estimands separate.
+
+\section{Empirical tail-regime heterogeneity: WIN\$ and the U.S. series}\label{sec:emp}
+\subsection{Gap-aware samples and estimated baseline}
+The WIN\$ dataset has 99,999 adjacent-row returns, 178 date transitions, and nine non-minute within-date transitions; the U.S. dataset analyzed as SPY has 77,216 returns, 202 date transitions, and 934 non-minute within-date transitions. Overnight observations are \emph{retained} and modeled with two state-specific gap scale multipliers, giving eight free parameters under separate regime degrees of freedom (seven under a common-tail restriction). This empirical conditional observation-mark extension should not be described as an unmodified six-parameter fit. A final independent audit of U.S. ticker identity, provenance, timezone, and adjustment conventions is still required.
+\begin{table}[htbp]\centering\caption{Gap-aware separate-tail HMM estimates and bootstrap equality tests}\label{tab:emp}
+\begin{tabular}{lrr}\toprule & WIN\$ & U.S. (SPY-labeled)\\\midrule
+$\widehat\nu_0$ & 4.11335 & 7.09939\\
+$\widehat\nu_1$ & 4.60794 & 4.93053\\
+$\widehat\Delta_\nu=\widehat\nu_0-\widehat\nu_1$ & -0.49458 & 2.16887\\
+Observed equal-tail LR & 13.41847 & 64.12759\\
+Nominal add-one bootstrap $p$ (400 draws) & 0.0024938 & 0.0024938\\
+Flagged null-bootstrap fits & 0 & 2\\\bottomrule
+\end{tabular}\end{table}
+The equal-tail rejection is \emph{conditional on the fitted model and bootstrap calibration}; it does not establish directionally asymmetric return tails or identify Gamma jumps. The sign of $\Delta_\nu$ cannot be compared across markets absent the declared same labeling convention. The best restricted profile likelihood exceeds the generic reported unrestricted optimizer likelihood slightly in both markets, indicating optimization-tolerance differences requiring reconciliation before final tables.
+\subsection{Profile-inverted confidence sets}\label{subsec:profile}
+The 400-replicate grids bracket the nominal 5\% bootstrap-profile boundaries as follows: WIN\$ lower boundary in $[-0.80,-0.75]$ and upper boundary in $[-0.25,-0.20]$; SPY lower boundary in $[1.55,1.60]$ and upper boundary in $[2.85,2.90]$. These are \emph{brackets}, not interpolated endpoint estimates or rigorously established connected intervals. In particular, acceptance at WIN\$ $\Delta=-0.75$ has $p=0.05237$, while $-0.80$ has $p=0.02494$; SPY $\Delta=2.85$ has $p=0.05486$, while $2.90$ has $p=0.01995$.
+\begin{table}[htbp]\centering\caption{Selected refined bootstrap-profile grid decisions ($B=400$)}\label{tab:profile}
+\begin{tabular}{llrrl}\toprule Market & $\Delta_\nu$ & Profile LR & Bootstrap $p$ & Decision at 5\%\\\midrule
+WIN\$ & $-0.80$ & 4.9835 & 0.02494 & Reject\\
+WIN\$ & $-0.75$ & 3.5070 & 0.05237 & Do not reject\\
+WIN\$ & $-0.25$ & 3.1820 & 0.07731 & Do not reject\\
+WIN\$ & $-0.20$ & 4.6341 & 0.02743 & Reject\\
+SPY & $1.55$ & 4.4510 & 0.03741 & Reject\\
+SPY & $1.60$ & 3.7701 & 0.05736 & Do not reject\\
+SPY & $2.85$ & 4.3127 & 0.05486 & Do not reject\\
+SPY & $2.90$ & 4.9301 & 0.01995 & Reject\\\bottomrule
+\end{tabular}\end{table}
+The Monte Carlo error of a 400-draw $p$ estimate near 0.05 is about $0.011$. Thus these grid-boundary decisions are provisional; optimizer flags at selected grid points and two flagged U.S. null calibrations must be audited. Report the inversion procedure and reference unrestricted likelihood consistently; replicate neighboring thresholds with more bootstrap draws if exact 95\% endpoints are needed.
+\subsection{Out-of-sample limitation}
+In a single chronological holdout, WIN\$ separate-tail mean log score (1.737307) is slightly below common-tail (1.737485), while the U.S. separate-tail score (2.455295) is slightly above common-tail (2.454389). Consequently, in-sample regime-tail distinction does not guarantee predictive improvement. These comparisons are a limitation rather than evidence of real Gamma contamination.
+
+\section{Out-of-sample downside-risk forecasts: Student-$t$ versus HMM}\label{sec:var}
+\subsection{Design and forecast information set}
+We assess the economic \emph{risk-measurement relevance} of latent-state heterogeneity, independently of the counterfactual omitted-jump identification question. The benchmarks are (M1) a single-regime centered Student-$t$ density with a common degrees-of-freedom parameter, regular scale, and overnight scale multiplier (three parameters); and (M2) a two-state centered Student-$t$ HMM with regime-dependent degrees of freedom, scales, persistence probabilities, and two overnight scale multipliers (eight parameters in the marked empirical extension). Neither model includes an explicit Gamma jump component. Consequently, a difference between their risk forecasts does \emph{not} estimate the omitted-Gamma-shock effect in Theorem~1.
+
+We use the supplied chronological 80/20 train/test split and re-estimate both models once on the initial training segment. For the test segment, the HMM's predictive regime probabilities depend on the previous observation and its filtered state, not the return being forecast. The forecast target is the \emph{next observed price-to-price log return}; it must not be described as exactly one elapsed clock minute across gaps. Date changes are marked as overnight intervals and assigned distinct volatility multipliers; irregular same-day time intervals are not separately scaled in the implementation. The marked forecast assumes the target interval class is known in advance. This is defensible for scheduled session boundaries, but must be qualified for unexpected missing timestamps. All return risk numbers below are in percentage log-return units, not currency.
+
+Let $Q^{(m)}_{\alpha,t}$ denote model $m$'s conditional predictive $\alpha$-quantile, computed from the Student-$t$ quantile for M1 and the \emph{predictive} two-component Student-$t$ mixture for M2, and define $\mathrm{VaR}^{(m)}_{\alpha,t}=-Q^{(m)}_{\alpha,t}$. The reported difference is
+\begin{equation}\label{eq:var_diff}
+\Delta\mathrm{VaR}_{\alpha,t}=\mathrm{VaR}^{\mathrm{HMM}}_{\alpha,t}-\mathrm{VaR}^{t}_{\alpha,t}.
+\end{equation}
+For each model, unconditional coverage is the empirical proportion of observations with $R_t<Q^{(m)}_{\alpha,t}$, compared with the nominal rate $\alpha$. The quantile (pinball) loss is
+\begin{equation}\label{eq:pinball}
+\rho_\alpha(R_t-Q_{\alpha,t})=(\alpha-\mathbf{1}\{R_t<Q_{\alpha,t}\})(R_t-Q_{\alpha,t}).
+\end{equation}
+A \emph{lower} mean loss indicates a more accurate quantile forecast under this scoring criterion; a lower numerical VaR in isolation does not. We also report an HAC-standardized mean differential in pinball losses (Student-$t$ minus HMM). Because model selection, multiple quantiles, time dependence, and boundary intervals complicate formal inference, the reported $z$ values are descriptive pending an independent audit of the HAC bandwidth and an appropriate joint testing procedure.
+
+\subsection{Results}\label{subsec:var_results}
+Table~\ref{tab:var} summarizes the two market files supplied for this analysis. The WIN\$ test segment contains 20,000 observed return intervals and the U.S. segment contains 15,444; only 35 and 40 intervals, respectively, are overnight. The U.S. source's ticker/provider identity is still subject to audit, hence the qualified label. Risk estimates refer to the same target intervals within each market.
+\begin{table}[htbp]\centering\small
+\caption{Out-of-sample Value-at-Risk comparison: single Student-$t$ versus marked Student-$t$ HMM}\label{tab:var}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lrrrrrrr}\toprule
+Market & VaR & \multicolumn{2}{c}{Mean VaR (\% log)} & \multicolumn{2}{c}{Violations (\%)} & Pinball & HAC\\
+& level & Student-$t$ & HMM & Student-$t$ & HMM & gain (\%) & $z$\\\midrule
+WIN\$ & 95 & 0.0688 & 0.0725 & 7.03 & 6.00 & 9.39 & 8.82 \\
+WIN\$ & 99 & 0.1441 & 0.1269 & 1.30 & 1.39 & 9.41 & 7.29 \\
+WIN\$ & 99.5 & 0.1930 & 0.1547 & 0.49 & 0.70 & 7.50 & 5.43 \\
+U.S. (SPY-labeled) & 95 & 0.0520 & 0.0417 & 2.27 & 3.79 & 12.23 & 7.31 \\
+U.S. (SPY-labeled) & 99 & 0.1020 & 0.0708 & 0.25 & 0.55 & 23.08 & 11.31 \\
+U.S. (SPY-labeled) & 99.5 & 0.1322 & 0.0855 & 0.05 & 0.25 & 27.85 & 13.53 \\
+\bottomrule\end{tabular}
+\par\vspace{2pt}\footnotesize\emph{Notes:} ``Pinball gain'' $=100(\overline\rho_t-\overline\rho_{\rm HMM})/\overline\rho_t$. Expected exceedance frequencies are 5\%, 1\%, and 0.5\% for the respective confidence levels. HAC statistics are as reported by the estimation code and are not adjusted for multiple testing. Positive gains favor HMM.
+\end{table}
+
+The HMM has lower average pinball loss in all six market--quantile comparisons, with reductions ranging from approximately 7.5\% to 27.9\%. This is evidence of improved \emph{relative} quantile scoring on the supplied holdouts, not uniform calibration. For example, at 99\% VaR the WIN\$ violation rate increases from 1.30\% with Student-$t$ to 1.39\% with HMM (nominal 1\%), whereas the U.S. rates are 0.25\% and 0.55\%, respectively (both below the nominal 1\%). At 95\%, WIN\$ violations are 7.04\% versus 6.00\% (both above 5\%), while the U.S. rates are 2.27\% versus 3.79\% (both below 5\%). Thus, a gain in strictly consistent quantile scoring does not imply an accurate coverage rate for each quantile. At 99\%, mean HMM VaR is lower by 0.01723 percentage-log-return units in WIN\$ and 0.03113 units in the U.S. series; these differences are model-specific risk-buffer implications, \emph{not} causally identified economic losses.
+
+\subsection{Scope and inference cautions}
+The reported predictive improvement comes from a \emph{single} chronological holdout per market and a single train/test estimation, rather than a broad rolling-origin experiment. The VaR comparison tests regime adaptation against a simpler unconditional Student-$t$ benchmark, not the incremental value of \emph{distinct regime degrees of freedom} conditional on a common-tail HMM. It also differs from the equal-tail profile hypothesis in Section~\ref{sec:emp}. More complex volatility baselines, repeated split-date robustness, quantile calibration diagnostics (including dependence of exceedances), and data provenance checks remain prerequisites for strong relative-forecasting claims. Expected-shortfall forecasts are produced by the software but not independently validated here; no comparative ES superiority or economic welfare-cost estimate is claimed. These results do not identify historic Gamma jumps, validate the specified jump family, or establish structural omitted-risk bias in actual returns.
+
+\section{Discussion, scope, and reproducibility}\label{sec:discussion}
+Three research components must remain distinct. First, the mathematical result is a finite-$T$ local misspecification derivative under fixed Gamma magnitude parameters, local identification, an observed-HMM information identity and full-sequence smoothing. Its numerical V3 impulse experiment examines this local derivative but has ill-conditioned observed information and unresolved population Monte Carlo precision. Second, the $4{,}000$-path no-jump DGP experiment tests estimation, false persistence, and reverse attribution; it is not evidence that shocks occurred or a separate test of the jump derivative. Third, the M1--M15 GARCH--HMM studies and marked real-market HMM studies are forecasting exercises with different parameterizations, samples, and identifying assumptions; they cannot be pooled into a single theorem-validation statistic.
+
+The main empirical lesson is that Markov-tail flexibility can be useful when states are sufficiently distinguishable through scale, yet a fitted HMM may overstate persistence under an iid mixture and may fail to recover genuine equal-variance tail switches. A favorable log score does not itself establish a structural Markov mechanism. APARCH power flexibility is an informative approximation benchmark; EGARCH numerical penalty cases and near-boundary tail parameters must be carried as limitations, not converted into favorable rankings. Formal null tests for identical HMM emissions or unidentified transition parameters require appropriate nonstandard calibration; naive standard $\chi^2$ conclusions are excluded.
+
+A full reproducibility archive must contain the original finite-window V1/V2/V3 codes and output, 4,000-path DGP design/seeds and individual results, all 19 competitor specifications and forecasts, the independent path-paired audit, M1--M15 timestamp and source audit, the two gap-aware empirical holdouts and their bootstraps, software versions, convergence/penalty flags and checksums. Source-market label verification, robustness of the two flagged U.S. bootstrap optimizer cases, and the path-level EGARCH numerical repair remain outstanding for an unqualified referee-ready claim. No original data or negative findings should be altered merely to improve rankings. Work on direct log-price cycles, structural jumps, risk-neutral option pricing, or a larger HMM-9 belongs to a separate paper.
+
+\section*{Conclusion}
+For a locally identifiable centered Student-$t$ HMM, omitted Bernoulli--Gamma shocks have a precisely characterized finite-window local influence on the observed-data pseudo-true parameters. Controlled simulations reveal both successful recovery for scale-separated states and serious identification limits under tail-only or weakly separated regimes, including false persistence under an independent mixture. The eight WIN/U.S. M1--M15 forecasting comparisons are nonuniform, as expected when state separation and sampling frequency vary, and do not uniquely identify a market mechanism. These results motivate a disciplined diagnostic approach---explicit benchmark competition, boundary-aware inference, causal holdout evaluation and transparent numerical audits---rather than universal claims of HMM superiority.\par
+\section*{Appendix A. Refined proof of Theorem 1: local omitted-jump bias in the observed HMM likelihood}\label{app:proof}
+\subsection*{A.6.1 Conditions and notation}
+Fix $T<\infty$ and the true baseline $\psi_0$. Work on a parameter neighborhood where the transition matrix is interior, the initial probabilities are strictly positive and smooth, regime emissions are strictly positive, scales and $\nu_j$ stay in compact admissible ranges with $\nu_j>2$, and the regime labels are resolved by a separately declared convention. Assume finite-$T$ local identification and $I_T\succ0$. Assume the observed log likelihood is twice continuously differentiable in $\psi$ and the population score is continuously differentiable jointly in $\psi$ and $\eps$ in a suitable \emph{one-sided} neighborhood. Its derivatives under the zero- and one-impulse distributions admit integrable dominators. In particular, require $\E_0\|S_TW_T\|<\infty$ and $\E_0\|\nabla_\psi S_T\|<\infty$ and sufficient integrability to justify the score information identity. Bounded and positive \emph{densities alone} do not establish these interchanges. The local pseudo-true branch is selected by negative-definite expected Hessian. To identify it with a \emph{global} pseudo-true maximum requires an additional isolated-global-maximum/compactness assumption and uniform criterion continuity; that stronger assertion is not automatic.
+
+\subsection*{A.6.2 Hidden-path emission perturbation}
+For fixed $\psi_0$ and $(k,\theta)$, let
+\begin{equation}
+g_{\eps,j}(y)=f_j(y)+\eps[h_j(y)-f_j(y)].\label{eq:app1}
+\end{equation}
+The contaminated observed-data joint density is
+\begin{equation}
+p_\eps(y_{1:T})=\sum_{k_{1:T}}\pi_{\psi_0}(k_1)\prod_{t=2}^TP_{\psi_0}(k_{t-1},k_t)
+\prod_{t=1}^T\big\{f_{k_t}(y_t)+\eps[h_{k_t}(y_t)-f_{k_t}(y_t)]\big\}.\label{eq:app2}
+\end{equation}
+All observations remain marginalized over hidden paths. For finite $T$ this is a polynomial in $\eps$; the derivative at $0+$ is obtained termwise. The polynomial also defines a differentiable algebraic extension to slightly negative $\eps$ although it need not then define a probability density. This extension may be used solely for the local implicit-function argument.
+
+\subsection*{A.6.3 Observed jump-incidence score and smoothing}
+Let $p^{[t]}(y)$ be the observed density with precisely time $t$ receiving a Gamma impulse. Differentiating \eqref{eq:app2} yields
+\begin{equation}
+\dot p_0(y):=\left.\partial_\eps^+p_\eps(y)\right|_0
+=\sum_{t=1}^T\{p^{[t]}(y)-p_0(y)\}.\label{eq:app3}
+\end{equation}
+Bayes' rule, using the \emph{full-vector} no-jump smoother, gives
+\begin{equation}
+\frac{p^{[t]}(y)}{p_0(y)}=\sum_j\Prb_0(K_t=j\mid Y_{1:T}=y)\frac{h_j(y_t)}{f_j(y_t)}.
+\end{equation}
+Therefore, since $p_0(y)>0$,
+\begin{equation}
+\left.\partial_\eps^+\log p_\eps(y)\right|_0=\frac{\dot p_0(y)}{p_0(y)}
+=\sum_{t,j}\gamma_{tj}(y)\left\{\frac{h_j(y_t)}{f_j(y_t)}-1\right\}=W_T(y).\label{eq:app4}
+\end{equation}
+Integration of \eqref{eq:app3} shows $\E_0W_T=0$. For any \emph{covered integrable} measurable $A(Y)$ (not arbitrarily for every integrable $A$ without further domination),
+\begin{equation}
+\left.\partial_\eps^+\E_\eps A(Y)\right|_0=\E_0[A(Y)W_T(Y)].\label{eq:app5}
+\end{equation}
+\subsection*{A.6.4 Equality with the whole-sequence single-impulse formula}
+Apply \eqref{eq:app5} to $A(y)=S_T(\psi_0;y)$ and substitute \eqref{eq:app3}:
+\begin{align}
+\E_0[S_TW_T]&=\int S_T(y)\dot p_0(y)\,dy\\
+&=\sum_{t=1}^T\left\{\int S_T(y)p^{[t]}(y)\,dy-\int S_T(y)p_0(y)\,dy\right\}\\
+&=\sum_{t=1}^T\E_0\E_G\{S_T(X^{[t,G]})-S_T(X)\}=B_T.\label{eq:app6}
+\end{align}
+Each evaluation of $S_T(X^{[t,G]})$ recomputes the full observed likelihood and its smoothing and transition weights, so no latent-state information is incorrectly held fixed.
+
+\subsection*{A.6.5 Population score equation and one-sided implicit differentiation}
+Define $F_T(\psi,\eps)=\E_\eps[S_T(\psi;Y)]$. Baseline correct specification implies $F_T(\psi_0,0)=0$. The assumed score interchange and information identity imply
+\begin{equation}
+D_\psi F_T(\psi_0,0)=\E_0[\nabla_\psi S_T(\psi_0;Y)]=-I_T,\qquad
+\partial_\eps^+F_T(\psi_0,0)=B_T.\label{eq:app7}
+\end{equation}
+Since $I_T\succ0$, the expected Hessian is negative definite at $\psi_0$. By the implicit-function theorem applied to the one-sided differentiable score map (or its finite-polynomial local extension), there is a locally unique stationary maximum branch with
+\begin{equation}
+0=B_T-I_T\left.\frac{d\psi_T^*(\eps)}{d\eps}\right|_{0+},\qquad
+\boxed{\left.\frac{d\psi_T^*(\eps)}{d\eps}\right|_{0+}=I_T^{-1}B_T
+=I_T^{-1}\E_0[S_TW_T].}\label{eq:app8}
+\end{equation}
+Right differentiability gives $\psi_T^*(\eps)=\psi_0+\eps I_T^{-1}B_T+o(\eps)$. Finally, apply the ordinary chain rule to \eqref{eq:qmap} to obtain the state-specific $q$ sensitivity. \hfill$\square$
+
+\subsection*{A.6.6 Referee-facing boundaries of the proof}
+\begin{itemize}
+\item All derivatives are of the \emph{observed-data} HMM likelihood; smoothing is exact under the baseline and may change across the full sequence after a shock.
+\item The result is for fixed finite $T$, fixed $k,\theta$, and a \emph{local} branch. It does not establish global identification of the jump model or a long-run limit.
+\item The condition $I_T\succ0$ concerns the full observed likelihood, not state-conditioned emission information. It is a substantive assumption, especially for short windows and nearly identical regimes.
+\item Positive and bounded Student-$t$ and Gamma-convolved densities are useful, but independent domination and square-integrability assumptions must be checked where used.
+\item A nonzero score projection does not resolve the nuisance-parameter-on-the-boundary problem at unknown $k,\theta$.
+\end{itemize}
+
+
+\section*{Appendix B. Proof of the weak-jump proposition}\label{app:p3}
+\subsection*{A.8.1 Translation expansion and the exact observed score}
+With $Z\sim\Gamma(k,1)$, $\E Z=k$ and $\E Z^2=k(k+1)$. Under the stipulated domination conditions, Taylor expansion of $h_{j,\theta}(y)=\E_Z f_j(y+\theta Z)$ yields
+\[
+ h_{j,\theta}(y)=f_j(y)+k\theta f_j'(y)
+ +\frac{k(k+1)}2\theta^2 f_j''(y)+o(\theta^2).
+\]
+Substitution in the exact observed-contamination score from Appendix A.6 gives
+\[
+ W_T(Y;\theta)=k\theta A_T(Y)
+ +\frac{k(k+1)}2\theta^2 C_T(Y)+o(\theta^2)
+\]
+in the score-weighted integrability sense required by the theorem.
+
+\subsection*{A.B.2 Symmetry cancellation in the full hidden-state likelihood}
+Every centered Student-$t$ emission is even. Consequently the full observed likelihood, including latent-path summation, satisfies $p_\beta^{(T)}(-y)=p_\beta^{(T)}(y)$, and its parameter score is even: $S_T(-y)=S_T(y)$. The baseline smoothing probabilities obey $\gamma_{tj}(-y)=\gamma_{tj}(y)$; $f_j'/f_j$ is odd and $f_j''/f_j$ is even. Thus $A_T(-y)=-A_T(y)$ while $C_T(-y)=C_T(y)$. Baseline sign symmetry implies
+\[
+ \E_0[S_T(Y)A_T(Y)]=0.
+\]
+By Theorem 1, $d_T(\theta)=I_T^{-1}\E_0[S_TW_T(\theta)]$, hence equations~\eqref{eq:p3-deriv}--\eqref{eq:p3-d} follow. The transformation $q_j=1+2/(\nu_j+1)$ and the chain rule give equation~\eqref{eq:p3-q}. The cancellation is for centered symmetric emissions and applies to \emph{all} components of the observed score; it cannot simply be transferred to a model with freely fitted locations.
+
+\subsection*{A.B.3 True and reported marginal quantiles}
+Let $F_0$ and $f_0^{\rm mar}$ denote the stationary marginal baseline cdf and density. The contaminated marginal cdf is
+\[
+ F_{\eps,\theta}(x)=(1-\eps)F_0(x)+\eps\E_Z F_0(x+\theta Z).
+\]
+It follows that $\partial_\eps F_{\eps,\theta}(x)|_{0^+}=k\theta f_0^{\rm mar}(x)+O(\theta^2)$ under the stipulated translation regularity. Set $x=Q_{\alpha}^{\rm true}(0,\theta)$ and differentiate $F_{\eps,\theta}(Q_{\alpha}^{\rm true}(\eps,\theta))=\alpha$; positivity of the density yields equation~\eqref{eq:p3-qtrue}. The fitted stationary HMM marginal cdf varies differentiably through $\beta_T^*$, whose derivative is $O(\theta^2)$ by the symmetry step. Its quantile therefore has derivative $O(\theta^2)$, proving~\eqref{eq:p3-qfit} and subtraction gives~\eqref{eq:p3-gap}. This result concerns \emph{marginal} quantiles and does not claim the same formula for conditional forecasts whose filtration and evolving state probabilities depend on earlier contaminated observations.
+
+\section*{Appendix C. Complete M1--M15 VaR scoring inventory}\label{app:intradayvar}
+The following table transparently reports every one of the 24 market--timeframe--confidence-level comparisons in the separate GARCH-based exercise. G0 denotes GARCH--Student-$t$, G1 GARCH--iid Student-$t$ mixture and G2 GARCH--HMM. ``Best'' means lowest sample-mean pinball loss \emph{within that cell}, without a statistical multiple-testing claim; it should not be read as identified Markov persistence. The G2 exceedance percentage is descriptive and not a conditional calibration test. These data are distinct from the eight-parameter gap-aware HMM comparison in Table~\ref{tab:var}.
+\begin{longtable}{llrllrr}
+\caption{Full downside-tail scoring inventory of eight intraday holdouts}\label{tab:all8var}\\
+\toprule Market & Frame & VaR level (\%) & Best loss & G2 pinball & G2 breaches (\%) & G2 breaches $n$ \\\midrule
+\endfirsthead
+\multicolumn{7}{c}{\emph{Appendix C continued}}\\\toprule Market & Frame & VaR level (\%) & Best loss & G2 pinball & G2 breaches (\%) & G2 breaches $n$ \\\midrule
+\endhead
+WIN & M1 & 95 & G2 & 0.005976 & 5.431 & 930 \\ 
+WIN & M1 & 99 & G2 & 0.001849 & 1.034 & 177 \\ 
+WIN & M1 & 99.5 & G2 & 0.001097 & 0.561 & 96 \\ 
+U.S. & M1 & 95 & G0 & 0.002466 & 4.440 & 681 \\ 
+U.S. & M1 & 99 & G1 & 0.000737 & 0.821 & 126 \\ 
+U.S. & M1 & 99.5 & G1 & 0.000433 & 0.430 & 66 \\ 
+WIN & M5 & 95 & G1 & 0.012928 & 4.689 & 160 \\ 
+WIN & M5 & 99 & G2 & 0.003838 & 0.909 & 31 \\ 
+WIN & M5 & 99.5 & G2 & 0.002258 & 0.381 & 13 \\ 
+U.S. & M5 & 95 & G0 & 0.005699 & 3.698 & 111 \\ 
+U.S. & M5 & 99 & G0 & 0.001802 & 1.066 & 32 \\ 
+U.S. & M5 & 99.5 & G0 & 0.001040 & 0.500 & 15 \\ 
+WIN & M10 & 95 & G1 & 0.018087 & 4.191 & 71 \\ 
+WIN & M10 & 99 & G2 & 0.005476 & 0.649 & 11 \\ 
+WIN & M10 & 99.5 & G1 & 0.003278 & 0.472 & 8 \\ 
+U.S. & M10 & 95 & G2 & 0.008251 & 4.220 & 63 \\ 
+U.S. & M10 & 99 & G1 & 0.002438 & 0.871 & 13 \\ 
+U.S. & M10 & 99.5 & G1 & 0.001417 & 0.268 & 4 \\ 
+WIN & M15 & 95 & G0 & 0.022253 & 3.654 & 41 \\ 
+WIN & M15 & 99 & G2 & 0.007160 & 0.980 & 11 \\ 
+WIN & M15 & 99.5 & G2 & 0.004302 & 0.535 & 6 \\ 
+U.S. & M15 & 95 & G0 & 0.011093 & 3.942 & 38 \\ 
+U.S. & M15 & 99 & G2 & 0.003765 & 0.726 & 7 \\ 
+U.S. & M15 & 99.5 & G2 & 0.002429 & 0.415 & 4 \\ 
+\bottomrule
+\end{longtable}
+\noindent\emph{Notes:} Nominal violation probabilities are 5\%, 1\%, and 0.5\% for VaR confidence levels of 95\%, 99\%, and 99.5\%. The horizons and holdout sizes differ across frequencies and all eight series share underlying market data; no aggregation across cells is interpreted as independent inference.
+
+\section*{Selected references}
+\begin{enumerate}[leftmargin=2em,label={[\arabic*]}]
+\item Alexandrovich, G., Holzmann, H., and Leister, A. (2016). Nonparametric identification and maximum likelihood estimation for hidden Markov models. \emph{Biometrika}, 103(2), 423--434. \href{https://doi.org/10.1093/biomet/asw001}{doi:10.1093/biomet/asw001}.
+\item Douc, R., and Moulines, E. (2012). Asymptotic properties of the maximum likelihood estimation in misspecified hidden Markov models. \emph{Annals of Statistics}, 40(5), 2697--2732. \href{https://doi.org/10.1214/12-AOS1047}{doi:10.1214/12-AOS1047}.
+\item White, H. (1982). Maximum likelihood estimation of misspecified models. \emph{Econometrica}, 50(1), 1--25. \href{https://doi.org/10.2307/1912526}{doi:10.2307/1912526}.
+\item Ding, Z., Granger, C. W. J., and Engle, R. F. (1993). A long memory property of stock market returns and a new model. \emph{Journal of Empirical Finance}, 1(1), 83--106.
+\item Bollerslev, T. (1986). Generalized autoregressive conditional heteroskedasticity. \emph{Journal of Econometrics}, 31(3), 307--327.
+\item Nelson, D. B. (1991). Conditional heteroskedasticity in asset returns: A new approach. \emph{Econometrica}, 59(2), 347--370.
+\item Giorno--Tsallis Research Program (2026). \emph{Result A: Local Omitted-Jump Bias in the Observed Likelihood of a Two-State Student-$t$ HMM}; \emph{Extension A1: Observed Jump-Score Representation and Efficient-Score Implication}. Internal reproducibility notes; manuscript citations to be finalized.
+\end{enumerate}
+\end{document}

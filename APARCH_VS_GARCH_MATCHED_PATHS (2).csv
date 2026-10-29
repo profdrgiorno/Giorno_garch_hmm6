@@ -1,0 +1,13 @@
+scenario,alternative,reference,matched_paths,mean_delta_logscore,MC_SE_delta,fraction_positive
+calibration_anchor,APARCH11-delta1-asym-t,GARCH11-t,1,0.009242595621924865,,1.0
+tail_only,APARCH11-delta1-asym-t,GARCH11-t,1,-0.003432410570296529,,0.0
+calibration_anchor,APARCH11-delta1-symmetric-t,GARCH11-t,1,0.011394103578702852,,1.0
+tail_only,APARCH11-delta1-symmetric-t,GARCH11-t,1,-0.0037579738444530886,,0.0
+calibration_anchor,APARCH11-delta2-asym-t,GARCH11-t,1,-0.016195076396619212,,0.0
+tail_only,APARCH11-delta2-asym-t,GARCH11-t,1,-0.0023097406012293487,,0.0
+calibration_anchor,APARCH11-delta2-symmetric-t,GARCH11-t,1,-2.980944155961396e-07,,0.0
+tail_only,APARCH11-delta2-symmetric-t,GARCH11-t,1,-0.0005523467187387165,,0.0
+calibration_anchor,APARCH11-power-symmetric-t,GARCH11-t,1,0.006020986730993272,,1.0
+tail_only,APARCH11-power-symmetric-t,GARCH11-t,1,-0.00014591198816882311,,0.0
+calibration_anchor,APARCH11-t,GARCH11-t,1,-0.006480342111183202,,0.0
+tail_only,APARCH11-t,GARCH11-t,1,-0.0029198546529194402,,0.0

@@ -1,0 +1,57 @@
+{
+  "options": {
+    "study": "_INCLUDED_PILOT",
+    "out": null,
+    "models": "all",
+    "starts": 1,
+    "maxiter": 60,
+    "limit_paths": 0,
+    "seed": 20261028,
+    "resume": false
+  },
+  "models": [
+    "Static-t",
+    "IIDmix-t",
+    "AR2-t",
+    "AR3-t",
+    "MA1-t",
+    "ARMA11-t",
+    "ARMA12-t",
+    "GARCH11-normal",
+    "GARCH11-t",
+    "GARCH12-t",
+    "GJR11-t",
+    "EGARCH11-t",
+    "APARCH11-t",
+    "APARCH11-power-symmetric-t",
+    "APARCH11-delta2-asym-t",
+    "APARCH11-delta2-symmetric-t",
+    "APARCH11-delta1-asym-t",
+    "APARCH11-delta1-symmetric-t",
+    "HN11-t"
+  ],
+  "architecture": "Student-t errors, fixed train-only parameters, causal one-step test log densities",
+  "inference_limitation": "All fits are custom MLE; compare convergence/restarts; not ARMA+GARCH joint",
+  "hn_warning": "HN-style variance recursion with Student-t innovations is not closed-form Heston-Nandi option pricing",
+  "true_info_used_only_after_fit": true,
+  "APARCH_restrictions": {
+    "APARCH11-power-symmetric-t": {
+      "gamma_power": 0.0
+    },
+    "APARCH11-delta2-asym-t": {
+      "delta": 2.0
+    },
+    "APARCH11-delta2-symmetric-t": {
+      "gamma_power": 0.0,
+      "delta": 2.0
+    },
+    "APARCH11-delta1-asym-t": {
+      "delta": 1.0
+    },
+    "APARCH11-delta1-symmetric-t": {
+      "gamma_power": 0.0,
+      "delta": 1.0
+    }
+  },
+  "APARCH_note": "delta=2,gamma=0 is GARCH; delta=2,asymmetric is GJR-like by coefficient mapping; EGARCH/HN are not nested"
+}

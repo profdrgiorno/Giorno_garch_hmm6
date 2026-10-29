@@ -1,0 +1,12 @@
+id,scenario,rep,model,oos_mean_logscore,optimizer_success
+weak_tail__rep0231,weak_tail,231,EGARCH11-t,-34500001.631768,True
+weak_tail__rep0338,weak_tail,338,EGARCH11-t,-1916668.9611954,True
+weak_tail__rep0437,weak_tail,437,EGARCH11-t,-48750001.14024941,True
+weak_tail__rep0455,weak_tail,455,EGARCH11-t,-31583335.065630075,True
+weak_persistence__rep0111,weak_persistence,111,EGARCH11-t,-4500002.023574621,True
+weak_persistence__rep0202,weak_persistence,202,EGARCH11-t,-1833335.435342613,True
+weak_persistence__rep0209,weak_persistence,209,EGARCH11-t,-9083335.408438666,True
+iid_mixture__rep0107,iid_mixture,107,EGARCH11-t,-25833334.96625267,True
+single_student_t__rep0337,single_student_t,337,EGARCH11-t,-23666668.5167766,False
+single_student_t__rep0458,single_student_t,458,EGARCH11-t,-6750002.06718224,True
+single_student_t__rep0492,single_student_t,492,EGARCH11-t,-34916668.04932121,True

@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "Please cite the Giorno–Tsallis HMM-6 working manuscript when using this code or these results."
+type: software
+title: "Giorno–Tsallis HMM-6: observed-likelihood sensitivity, known-DGP identification and M1–M15 evidence"
+authors:
+  - family-names: Giorno
+    given-names: J.
+version: 0.9.0
+date-released: 2026-10-29
+abstract: "Working reproducibility package accompanying a referee-review draft of a centered Student-t hidden Markov model study. Includes a finite-window omitted-shock theorem, known-DGP simulations, reverse attribution and selected intraday market comparisons."

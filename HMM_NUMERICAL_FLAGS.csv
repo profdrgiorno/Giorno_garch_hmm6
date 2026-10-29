@@ -1,0 +1,2 @@
+id,scenario,rep,train_loglik,true_parameter_train_loglik,train_loglik_gain_vs_truth
+tail_only__rep0192,tail_only,192,-6746.612726706349,-6746.360613036352,-0.2521136699970157

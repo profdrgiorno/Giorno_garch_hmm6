@@ -1,0 +1,3 @@
+id,scenario,rep,seed,n,n_train,dataset_path,identification,true_rho,true_pi0,true_p00,true_p11,true_nu0,true_nu1,true_s0,true_s1
+calibration_anchor__rep0000,calibration_anchor,0,3458662461,400,320,datasets/calibration_anchor__rep0000.csv,identifiable,0.8999999999999999,0.6,0.96,0.94,12.0,4.5,0.5,1.8
+tail_only__rep0000,tail_only,0,1334675065,400,320,datasets/tail_only__rep0000.csv,identifiable,0.825,0.8571428571428577,0.975,0.85,24.0,4.6,0.9574271077563381,0.7518094115561123

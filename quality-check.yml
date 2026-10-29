@@ -1,0 +1,22 @@
+name: Repository sanity checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  sanity:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install scientific dependencies
+        run: python -m pip install -r requirements.txt
+      - name: Compile repository source files
+        run: python -m compileall -q code tools
+      - name: Verify released artifacts and counts
+        run: python tools/verify_release.py
+      - name: Verify APARCH-to-GARCH nesting
+        working-directory: code/simulation
+        run: python 04_verify_aparch_nesting.py
